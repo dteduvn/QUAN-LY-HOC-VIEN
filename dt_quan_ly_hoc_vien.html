@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>D&T Academy · Quản lý học viên</title>
+<style>
+:root{
+  --yellow:#FCE79A; --yellow-soft:#FFF7D6; --yellow-deep:#E9C440;
+  --ink:#2B2A26; --muted:#6F6A5E; --line:#ECE5CF; --bg:#FFFCF2; --card:#fff;
+  --green:#2E8B57; --red:#C0392B; --blue:#2D6CDF; --orange:#D9822B;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:15px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+[hidden]{display:none!important}
+
+/* ---------- login ---------- */
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px 24px;width:100%;max-width:360px;box-shadow:0 8px 30px rgba(120,100,20,.08)}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.brand-mark{width:44px;height:44px;border-radius:12px;background:var(--yellow);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;letter-spacing:-.5px}
+.brand h1{font-size:18px;margin:0}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field label{font-size:13px;color:var(--muted);font-weight:600}
+.field input,.field select,.field textarea{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;outline:none;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--yellow-deep);box-shadow:0 0 0 3px var(--yellow-soft)}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 14px;font-weight:600;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{background:var(--yellow-soft)}
+.btn.primary{background:var(--yellow);border-color:var(--yellow-deep)}
+.btn.primary:hover{background:#F8DD74}
+.btn.danger{color:var(--red);border-color:#F0C9C4}
+.btn.danger.solid{background:var(--red);color:#fff;border-color:var(--red)}
+.btn.small{padding:5px 10px;font-size:13px;border-radius:8px}
+.btn:disabled{opacity:.5;cursor:default}
+.link{background:none;border:none;color:var(--blue);padding:0;font-size:13px}
+.err{color:var(--red);font-size:13px;min-height:18px;margin:4px 0 10px}
+
+/* ---------- app ---------- */
+header{background:var(--yellow);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:5}
+header .brand{margin:0}
+header .brand-mark{background:#fff}
+.user{font-size:12px;color:var(--ink);text-align:right}
+.user .link{color:var(--ink);text-decoration:underline}
+main{max-width:1100px;margin:0 auto;padding:14px 14px 80px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px}
+.stat b{display:block;font-size:24px;line-height:1.1}
+.stat span{font-size:12px;color:var(--muted)}
+.stat.warn b{color:var(--orange)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.search{flex:1;min-width:180px;border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:#fff}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:6px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;white-space:nowrap}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip small{opacity:.65;font-weight:500;margin-left:3px}
+.opts{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin:4px 2px 10px;gap:10px;flex-wrap:wrap}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:10px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:7px}
+.card.inactive{opacity:.55;background:#FAF8F2}
+.card-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.card h3{margin:0;font-size:16px}
+.meta{font-size:13px;color:var(--muted)}
+.tags{display:flex;gap:5px;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--yellow-soft);border:1px solid var(--line)}
+.tag.code{background:#F1EFE8;font-family:ui-monospace,Menlo,monospace}
+.tag.off{background:#EEE;color:#777}
+.tag.warn{background:#FFF0E0;color:var(--orange);border-color:#F6D5B0}
+.contact{display:flex;gap:10px;font-size:13px;align-items:center;flex-wrap:wrap}
+.contact a{color:var(--blue);text-decoration:none;font-weight:600}
+.progress{display:flex;align-items:center;gap:8px;font-size:13px}
+.bar{flex:1;height:8px;background:#F1EDE0;border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--green);border-radius:99px}
+.bar.full i{background:var(--orange)}
+.step{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:#fff;font-weight:700;padding:0}
+.card-actions{display:flex;gap:6px;justify-content:flex-end}
+.empty{text-align:center;color:var(--muted);padding:40px 10px;background:#fff;border:1px dashed var(--line);border-radius:14px}
+.banner{background:#FFF0E0;border:1px solid #F6D5B0;border-radius:12px;padding:10px 14px;font-size:13px;margin-bottom:12px}
+.banner.demo{background:#E8F1FF;border-color:#C6DAFB}
+
+/* ---------- modal ---------- */
+.overlay{position:fixed;inset:0;background:rgba(40,35,20,.45);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+@media(min-width:640px){.overlay{align-items:center}}
+.modal{background:#fff;width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px 18px 16px}
+@media(min-width:640px){.modal{border-radius:18px}}
+.modal.wide{max-width:860px}
+.modal h2{margin:0 0 14px;font-size:18px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.grid2 .full{grid-column:1/-1}
+.modal-foot{display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap}
+.modal-foot .right{display:flex;gap:8px;margin-left:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:700;background:#FCFAF3;position:sticky;top:0}
+td.skip{color:#999;text-decoration:line-through}
+.file-block{border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.file-head{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--yellow-soft);flex-wrap:wrap}
+.file-head b{font-size:14px}
+.file-body{max-height:260px;overflow:auto}
+.drop{display:block;border:2px dashed var(--yellow-deep);border-radius:14px;padding:26px 14px;text-align:center;background:var(--yellow-soft);cursor:pointer}
+.drop p{margin:6px 0 0;color:var(--muted);font-size:13px}
+.cls-row{display:grid;grid-template-columns:1.2fr 1fr .8fr 1.2fr auto;gap:6px;align-items:center;margin-bottom:6px}
+.cls-row input{border:1px solid var(--line);border-radius:8px;padding:7px 8px;width:100%}
+.cls-head{font-size:12px;color:var(--muted);font-weight:700}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:40;max-width:90vw}
+@media(max-width:640px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .grid2{grid-template-columns:1fr}
+  .cls-row{grid-template-columns:1fr 1fr;}
+  .cls-head{display:none}
+  .toolbar .btn .lbl{display:none}
+  .search{flex-basis:100%}
+  .toolbar .btn{flex:1;justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<!-- =============== LOGIN =============== -->
+<div id="login" hidden>
+  <form class="login-card" id="loginForm">
+    <div class="brand">
+      <div class="brand-mark">D&amp;T</div>
+      <div><h1>D&amp;T Academy</h1><p>Hệ thống quản lý trung tâm</p></div>
+    </div>
+    <div class="field"><label>Email</label><input id="loginEmail" type="email" autocomplete="username" required></div>
+    <div class="field"><label>Mật khẩu</label><input id="loginPass" type="password" autocomplete="current-password" required></div>
+    <div class="err" id="loginErr"></div>
+    <button class="btn primary" style="width:100%;justify-content:center" type="submit">Đăng nhập</button>
+    <p style="text-align:center;margin:12px 0 0"><button type="button" class="link" id="forgotBtn">Quên mật khẩu?</button></p>
+  </form>
+</div>
+
+<!-- =============== APP =============== -->
+<div id="app" hidden>
+  <header>
+    <div class="brand">
+      <div class="brand-mark">D&amp;T</div>
+      <div><h1>Quản lý học viên</h1><p style="color:var(--ink);opacity:.7">D&amp;T Academy</p></div>
+    </div>
+    <div class="user"><div id="userEmail"></div><button class="link" id="logoutBtn">Đăng xuất</button></div>
+  </header>
+  <main>
+    <div id="banner"></div>
+    <section class="stats">
+      <div class="stat"><b id="stActive">0</b><span>Học viên đang học</span></div>
+      <div class="stat"><b id="stClasses">0</b><span>Lớp</span></div>
+      <div class="stat warn"><b id="stDue">0</b><span>Đã hết gói 12 buổi</span></div>
+      <div class="stat"><b id="stInactive">0</b><span>Đã nghỉ học</span></div>
+    </section>
+
+    <div class="toolbar">
+      <input class="search" id="search" placeholder="🔍 Tìm tên, mã HV hoặc SĐT…">
+      <button class="btn primary" id="addBtn">＋ <span class="lbl">Thêm học viên</span></button>
+      <button class="btn" id="importBtn">📥 <span class="lbl">Nhập Excel</span></button>
+      <button class="btn" id="exportBtn">📤 <span class="lbl">Xuất Excel</span></button>
+      <button class="btn" id="classBtn">🏫 <span class="lbl">Lớp học</span></button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="opts">
+      <span id="countLbl"></span>
+      <label><input type="checkbox" id="showInactive"> Hiện cả học viên đã nghỉ</label>
+    </div>
+    <div class="list" id="list"></div>
+  </main>
+</div>
+
+<!-- =============== MODALS =============== -->
+<div class="overlay" id="studentModal" hidden>
+  <form class="modal" id="studentForm">
+    <h2 id="smTitle">Thêm học viên</h2>
+    <div class="grid2">
+      <div class="field full"><label>Họ và tên *</label><input id="fName" required></div>
+      <div class="field"><label>Lớp *</label><select id="fClass" required></select></div>
+      <div class="field"><label>Ngày sinh (dd/mm/yyyy)</label><input id="fDob" placeholder="VD: 05/09/2017"></div>
+      <div class="field"><label>Giới tính</label><select id="fGender"><option value="">—</option><option>Nam</option><option>Nữ</option></select></div>
+      <div class="field"><label>Cấp độ</label><input id="fLevel" placeholder="Pre-A1, A1, A2, B1…"></div>
+      <div class="field"><label>Tên phụ huynh</label><input id="fParent"></div>
+      <div class="field"><label>SĐT / Zalo phụ huynh</label><input id="fPhone" inputmode="tel"></div>
+      <div class="field"><label>Học phí mỗi gói 12 buổi (VNĐ)</label><input id="fFee" inputmode="numeric"></div>
+      <div class="field"><label>Đã học trong gói hiện tại (0–12)</label><input id="fUsed" type="number" min="0" max="12"></div>
+      <div class="field"><label>Ngày nhập học</label><input id="fStart" placeholder="dd/mm/yyyy"></div>
+      <div class="field"><label>Trạng thái</label><select id="fStatus"><option value="active">Đang học</option><option value="inactive">Đã nghỉ</option></select></div>
+      <div class="field full"><label>Địa chỉ</label><input id="fAddress"></div>
+      <div class="field full"><label>Ghi chú</label><textarea id="fNote" rows="2"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn danger" id="smDelete" hidden>🗑 Xóa / cho nghỉ</button>
+      <div class="right">
+        <button type="button" class="btn" data-close>Hủy</button>
+        <button type="submit" class="btn primary" id="smSave">Lưu</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="overlay" id="confirmModal" hidden>
+  <div class="modal" style="max-width:420px">
+    <h2 id="cmTitle"></h2>
+    <p id="cmText" style="margin:0 0 16px;line-height:1.5"></p>
+    <div class="modal-foot" id="cmFoot"></div>
+  </div>
+</div>
+
+<div class="overlay" id="importModal" hidden>
+  <div class="modal wide">
+    <h2>Nhập học viên từ file Excel</h2>
+    <label class="drop" id="drop">
+      <input type="file" id="fileInput" accept=".xlsx,.xls" multiple hidden>
+      <b>Chọn hoặc kéo thả file Excel vào đây</b>
+      <p>Chọn được nhiều file một lần (mỗi lớp một file). Dùng mẫu “Danh sách HV” của trung tâm.</p>
+    </label>
+    <div id="importPreview" style="margin-top:14px"></div>
+    <div class="modal-foot">
+      <span class="meta" id="importSummary"></span>
+      <div class="right">
+        <button class="btn" data-close>Đóng</button>
+        <button class="btn primary" id="importGo" disabled>Nhập</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="classModal" hidden>
+  <div class="modal wide">
+    <h2>Lớp học</h2>
+    <div class="cls-row cls-head"><span>Tên lớp</span><span>Học phí / gói 12 buổi</span><span>Cấp độ</span><span>Giáo viên</span><span></span></div>
+    <div id="classRows"></div>
+    <div class="modal-foot">
+      <button class="btn" id="addClassBtn">＋ Thêm lớp</button>
+      <div class="right"><button class="btn" data-close>Đóng</button><button class="btn primary" id="saveClasses">Lưu thay đổi</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" hidden></div>
+
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script type="module">
+/* ============================================================
+   CẤU HÌNH FIREBASE (dùng chung project với tracker bài tập)
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyAqCMHVsE7pLmcP-iTjOh0F_GW2v4U8X20",
+  authDomain: "dt-academy-tracker.firebaseapp.com",
+  projectId: "dt-academy-tracker",
+  storageBucket: "dt-academy-tracker.firebasestorage.app",
+  messagingSenderId: "118306441305",
+  appId: "1:118306441305:web:906735a9c0a830a8214948"
+};
+const SESSIONS_PER_PACK = 12;
+const DEMO = new URLSearchParams(location.search).has('demo');
+const SDK = "https://www.gstatic.com/firebasejs/12.14.0/";
+
+/* ---------------- helpers ---------------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = n => (Number(n)||0).toLocaleString('vi-VN') + 'đ';
+const norm = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase().replace(/\s+/g,' ').trim();
+const pad = n => String(n).padStart(2,'0');
+const today = () => { const d=new Date(); return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`; };
+const givenName = s => String(s||'').trim().split(/\s+/).pop();
+const vnSort = (a,b) => givenName(a).localeCompare(givenName(b),'vi') || String(a).localeCompare(String(b),'vi');
+
+function toast(msg, ms=2600){ const t=$('toast'); t.textContent=msg; t.hidden=false; clearTimeout(t._h); t._h=setTimeout(()=>t.hidden=true, ms); }
+function openModal(id){ $(id).hidden=false; }
+function closeModal(id){ $(id).hidden=true; }
+document.querySelectorAll('.overlay').forEach(o=>{
+  o.addEventListener('click', e=>{ if(e.target===o || e.target.hasAttribute('data-close')) o.hidden=true; });
+});
+
+function cleanPhone(v){
+  let p = String(v??'').replace(/\D/g,'');
+  if(p.startsWith('84') && p.length===11) p='0'+p.slice(2);
+  if(p.length===9 && !p.startsWith('0')) p='0'+p;
+  return p;
+}
+function cleanDob(v){
+  if(v===null||v===undefined||v==='') return '';
+  if(typeof v==='number' && window.XLSX){ const d=XLSX.SSF.parse_date_code(v); if(d) return `${pad(d.d)}/${pad(d.m)}/${d.y}`; }
+  let s = String(v).trim().replace(/[.\-\s]+/g,'/');
+  let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/) || s.match(/^(\d{1,2})\/(\d{1,2})(\d{4})$/);
+  if(m) return `${pad(m[1])}/${pad(m[2])}/${m[3]}`;
+  return s;
+}
+function warnings(st){
+  const w=[];
+  const m = String(st.dob||'').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if(st.dob && !m) w.push('Ngày sinh sai định dạng');
+  else if(m){
+    const y=+m[3], age=new Date().getFullYear()-y;
+    if(+m[1]>31||+m[2]>12) w.push('Ngày sinh không hợp lệ');
+    else if(age<3||age>70) w.push('Kiểm tra lại năm sinh');
+  }
+  if(st.phone && st.phone.length!==10) w.push('SĐT không đủ 10 số');
+  if(!st.phone) w.push('Chưa có SĐT');
+  return w;
+}
+
+/* ============================================================
+   DATA STORE — Firebase thật, hoặc ?demo=1 để xem thử
+   ============================================================ */
+let store;
+const state = { students:[], classes:[], filter:'all', q:'', showInactive:false };
+
+async function makeFirebaseStore(){
+  const { initializeApp } = await import(SDK+"firebase-app.js");
+  const A = await import(SDK+"firebase-auth.js");
+  const F = await import(SDK+"firebase-firestore.js");
+  const app = initializeApp(firebaseConfig);
+  const auth = A.getAuth(app);
+  const db = F.getFirestore(app);
+  const unsubs=[];
+  return {
+    auth, A,
+    onAuth: cb => A.onAuthStateChanged(auth, cb),
+    login: (e,p) => A.signInWithEmailAndPassword(auth,e,p),
+    logout: () => A.signOut(auth),
+    reset: e => A.sendPasswordResetEmail(auth,e),
+    watch(onStudents, onClasses, onError){
+      unsubs.push(F.onSnapshot(F.collection(db,'students'), s=>onStudents(s.docs.map(d=>({id:d.id,...d.data()}))), onError));
+      unsubs.push(F.onSnapshot(F.collection(db,'classes'),  s=>onClasses(s.docs.map(d=>({id:d.id,...d.data()}))), onError));
+    },
+    stop(){ unsubs.splice(0).forEach(u=>u()); },
+    async reserveCodes(n){
+      const ref = F.doc(db,'meta','counters');
+      const start = await F.runTransaction(db, async tx=>{
+        const snap = await tx.get(ref);
+        const cur = snap.exists() ? (snap.data().student||0) : 0;
+        tx.set(ref,{student:cur+n},{merge:true});
+        return cur+1;
+      });
+      return Array.from({length:n},(_,i)=>'HS'+String(start+i).padStart(3,'0'));
+    },
+    async addStudents(list){
+      const codes = await this.reserveCodes(list.length);
+      for(let i=0;i<list.length;i+=400){
+        const batch = F.writeBatch(db);
+        list.slice(i,i+400).forEach((st,j)=>{
+          batch.set(F.doc(F.collection(db,'students')), {...st, code:codes[i+j], createdAt:F.serverTimestamp(), updatedAt:F.serverTimestamp()});
+        });
+        await batch.commit();
+      }
+    },
+    updateStudent: (id,data) => F.updateDoc(F.doc(db,'students',id), {...data, updatedAt:F.serverTimestamp()}),
+    deleteStudent: id => F.deleteDoc(F.doc(db,'students',id)),
+    async addClass(c){ const r = await F.addDoc(F.collection(db,'classes'), c); return r.id; },
+    updateClass: (id,data) => F.updateDoc(F.doc(db,'classes',id), data),
+    deleteClass: id => F.deleteDoc(F.doc(db,'classes',id)),
+  };
+}
+
+function makeDemoStore(){
+  let sid=0, cid=0, counter=0, S=[], C=[], cbS, cbC;
+  const emit=()=>{ cbS && cbS(S.map(x=>({...x}))); cbC && cbC(C.map(x=>({...x}))); };
+  const c1='c'+(++cid), c2='c'+(++cid);
+  C=[{id:c1,name:'Lớp 1',fee:500000,level:'Pre-A1',teacher:'',order:1},{id:c2,name:'Lớp 4',fee:500000,level:'A1',teacher:'',order:4}];
+  const demo=[['Trần Minh An','12/03/2020','Nam','0912000111',c1,4],['Lê Ngọc Bích','05/09/2020','Nữ','0912000222',c1,12],['Phạm Gia Huy','30/11/2020','Nam','091200033',c1,7],
+              ['Đỗ Thu Hà','18/07/2017','Nữ','0912000444',c2,2],['Vũ Đức Long','02/02/2017','Nam','0912000555',c2,11],['Ngô Khánh Linh','21/12/2025','Nữ','0912000666',c2,9]];
+  S=demo.map(([name,dob,gender,phone,classId,used])=>({id:'s'+(++sid),code:'HS'+String(++counter).padStart(3,'0'),name,dob,gender,phone,classId,sessionsUsed:used,fee:500000,level:'',status:'active',parentName:'',address:'',startDate:'',note:''}));
+  return {
+    onAuth: cb => cb({email:'demo@dteducation.edu.vn'}),
+    login: async()=>{}, logout: async()=>toast('Bản xem thử – không cần đăng xuất'), reset: async()=>{},
+    watch(a,b){ cbS=a; cbC=b; emit(); }, stop(){},
+    async addStudents(list){ list.forEach(st=>S.push({...st,id:'s'+(++sid),code:'HS'+String(++counter).padStart(3,'0')})); emit(); },
+    async updateStudent(id,d){ Object.assign(S.find(x=>x.id===id),d); emit(); },
+    async deleteStudent(id){ S=S.filter(x=>x.id!==id); emit(); },
+    async addClass(c){ const id='c'+(++cid); C.push({...c,id}); emit(); return id; },
+    async updateClass(id,d){ Object.assign(C.find(x=>x.id===id),d); emit(); },
+    async deleteClass(id){ C=C.filter(x=>x.id!==id); emit(); },
+  };
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+const classById = id => state.classes.find(c=>c.id===id);
+const sortedClasses = () => [...state.classes].sort((a,b)=>(a.order??99)-(b.order??99) || String(a.name).localeCompare(String(b.name),'vi',{numeric:true}));
+
+function render(){
+  const act = state.students.filter(s=>s.status!=='inactive');
+  $('stActive').textContent = act.length;
+  $('stClasses').textContent = state.classes.length;
+  $('stDue').textContent = act.filter(s=>(s.sessionsUsed||0)>=SESSIONS_PER_PACK).length;
+  $('stInactive').textContent = state.students.length-act.length;
+
+  // chips
+  const counts = {}; act.forEach(s=>counts[s.classId]=(counts[s.classId]||0)+1);
+  const chipData = [{id:'all',name:'Tất cả',n:act.length}, ...sortedClasses().map(c=>({id:c.id,name:c.name,n:counts[c.id]||0})),
+                    {id:'due',name:'⚠ Hết gói',n:act.filter(s=>(s.sessionsUsed||0)>=SESSIONS_PER_PACK).length}];
+  $('chips').innerHTML = chipData.map(c=>`<button class="chip ${state.filter===c.id?'on':''}" data-chip="${c.id}">${esc(c.name)}<small>${c.n}</small></button>`).join('');
+
+  // list
+  const q = norm(state.q);
+  let rows = state.students.filter(s=>{
+    if(!state.showInactive && s.status==='inactive') return false;
+    if(state.filter==='due'){ if(s.status==='inactive' || (s.sessionsUsed||0)<SESSIONS_PER_PACK) return false; }
+    else if(state.filter!=='all' && s.classId!==state.filter) return false;
+    if(q && !(norm(s.name).includes(q) || norm(s.code).includes(q) || String(s.phone||'').includes(q.replace(/\s/g,'')))) return false;
+    return true;
+  });
+  const order = Object.fromEntries(sortedClasses().map((c,i)=>[c.id,i]));
+  rows.sort((a,b)=>(order[a.classId]??99)-(order[b.classId]??99) || vnSort(a.name,b.name));
+  $('countLbl').textContent = `${rows.length} học viên`;
+
+  if(!rows.length){
+    $('list').innerHTML = `<div class="empty">${state.students.length ? 'Không có học viên nào khớp.' : 'Chưa có học viên nào.<br><br><button class="btn primary" onclick="document.getElementById(\'importBtn\').click()">📥 Nhập từ file Excel</button>'}</div>`;
+    return;
+  }
+  $('list').innerHTML = rows.map(s=>{
+    const c = classById(s.classId);
+    const used = Math.min(s.sessionsUsed||0, SESSIONS_PER_PACK);
+    const w = warnings(s);
+    return `<div class="card ${s.status==='inactive'?'inactive':''}">
+      <div class="card-top">
+        <div><h3>${esc(s.name)}</h3><div class="meta">${esc(s.dob||'—')}${s.gender?' · '+esc(s.gender):''}${s.level?' · '+esc(s.level):''}</div></div>
+        <div class="tags"><span class="tag code">${esc(s.code||'')}</span><span class="tag">${esc(c?.name||'Chưa xếp lớp')}</span>${s.status==='inactive'?'<span class="tag off">Đã nghỉ</span>':''}</div>
+      </div>
+      ${w.length?`<div class="tags">${w.map(x=>`<span class="tag warn">⚠ ${esc(x)}</span>`).join('')}</div>`:''}
+      <div class="contact">${s.parentName?esc(s.parentName)+' · ':''}${s.phone?`<a href="tel:${esc(s.phone)}">📞 ${esc(s.phone)}</a><a href="https://zalo.me/${esc(s.phone)}" target="_blank" rel="noopener">Zalo</a>`:'<span class="meta">Chưa có SĐT</span>'}<span class="meta" style="margin-left:auto">${money(s.fee)}/gói</span></div>
+      <div class="progress">
+        <button class="step" data-step="-1" data-id="${s.id}" aria-label="Bớt 1 buổi">−</button>
+        <div class="bar ${used>=SESSIONS_PER_PACK?'full':''}"><i style="width:${used/SESSIONS_PER_PACK*100}%"></i></div>
+        <b>${used}/${SESSIONS_PER_PACK}</b>
+        <button class="step" data-step="1" data-id="${s.id}" aria-label="Thêm 1 buổi">+</button>
+      </div>
+      <div class="card-actions">
+        ${used>=SESSIONS_PER_PACK && s.status!=='inactive'?`<button class="btn small" data-renew="${s.id}">✅ Đã đóng gói mới</button>`:''}
+        <button class="btn small" data-edit="${s.id}">✏️ Sửa</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ============================================================
+   STUDENT ADD / EDIT / DELETE
+   ============================================================ */
+let editingId = null;
+function fillClassSelect(sel, value){
+  sel.innerHTML = sortedClasses().map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('') || '<option value="">(Chưa có lớp – tạo lớp trước)</option>';
+  if(value) sel.value=value;
+}
+function openStudent(id){
+  editingId = id||null;
+  const s = id ? state.students.find(x=>x.id===id) : {};
+  $('smTitle').textContent = id ? `Sửa học viên · ${s.code||''}` : 'Thêm học viên';
+  fillClassSelect($('fClass'), s.classId || (state.filter!=='all'&&state.filter!=='due'?state.filter:''));
+  $('fName').value=s.name||''; $('fDob').value=s.dob||''; $('fGender').value=s.gender||''; $('fLevel').value=s.level||classById($('fClass').value)?.level||'';
+  $('fParent').value=s.parentName||''; $('fPhone').value=s.phone||''; $('fFee').value=s.fee ?? (classById($('fClass').value)?.fee||'');
+  $('fUsed').value=s.sessionsUsed??0; $('fStart').value=s.startDate||(id?'':today()); $('fStatus').value=s.status||'active';
+  $('fAddress').value=s.address||''; $('fNote').value=s.note||'';
+  $('smDelete').hidden = !id;
+  openModal('studentModal'); setTimeout(()=>$('fName').focus(),50);
+}
+$('fClass').addEventListener('change',()=>{
+  if(editingId) return;
+  const c=classById($('fClass').value); if(c){ $('fFee').value=c.fee||''; if(!$('fLevel').value) $('fLevel').value=c.level||''; }
+});
+$('studentForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  if(!$('fClass').value){ toast('Hãy tạo lớp trước (nút 🏫 Lớp học)'); return; }
+  const data = {
+    name: $('fName').value.trim().replace(/\s+/g,' '),
+    classId: $('fClass').value, dob: cleanDob($('fDob').value), gender: $('fGender').value,
+    level: $('fLevel').value.trim(), parentName: $('fParent').value.trim(), phone: cleanPhone($('fPhone').value),
+    fee: Number(String($('fFee').value).replace(/\D/g,''))||0,
+    sessionsUsed: Math.max(0,Math.min(SESSIONS_PER_PACK, Number($('fUsed').value)||0)),
+    startDate: cleanDob($('fStart').value), status: $('fStatus').value,
+    address: $('fAddress').value.trim(), note: $('fNote').value.trim(),
+  };
+  $('smSave').disabled=true;
+  try{
+    if(editingId){ await store.updateStudent(editingId,data); toast('Đã lưu ✔'); }
+    else{
+      const dup = state.students.find(s=>norm(s.name)===norm(data.name) && s.classId===data.classId);
+      if(dup && !await confirmDialog('Trùng tên', `Lớp này đã có “${dup.name}” (${dup.code}). Vẫn thêm mới?`, 'Vẫn thêm')) { $('smSave').disabled=false; return; }
+      await store.addStudents([data]); toast('Đã thêm học viên ✔');
+    }
+    closeModal('studentModal');
+  }catch(err){ showError(err); }
+  $('smSave').disabled=false;
+});
+
+$('smDelete').addEventListener('click', ()=>{
+  const s = state.students.find(x=>x.id===editingId); if(!s) return;
+  $('cmTitle').textContent = `Xóa “${s.name}”?`;
+  $('cmText').innerHTML = `<b>Cho nghỉ học</b>: ẩn khỏi danh sách nhưng vẫn giữ lại hồ sơ, lịch sử học phí và điểm (nên dùng).<br><b>Xóa vĩnh viễn</b>: mất hẳn, không khôi phục được.`;
+  $('cmFoot').innerHTML = `<button class="btn" data-x="cancel">Hủy</button><div class="right"><button class="btn danger" data-x="hard">Xóa vĩnh viễn</button><button class="btn primary" data-x="soft">Cho nghỉ học</button></div>`;
+  $('cmFoot').onclick = async e=>{
+    const x=e.target.dataset.x; if(!x) return;
+    closeModal('confirmModal');
+    if(x==='cancel') return;
+    try{
+      if(x==='soft'){ await store.updateStudent(s.id,{status:'inactive', leftDate:today()}); toast('Đã chuyển sang “Đã nghỉ”'); }
+      if(x==='hard'){
+        if(!await confirmDialog('Chắc chắn xóa?', `Xóa vĩnh viễn hồ sơ ${s.name} (${s.code}).`, 'Xóa', true)) return;
+        await store.deleteStudent(s.id); toast('Đã xóa');
+      }
+      closeModal('studentModal');
+    }catch(err){ showError(err); }
+  };
+  openModal('confirmModal');
+});
+
+function confirmDialog(title, text, okLabel='Đồng ý', danger=false){
+  return new Promise(res=>{
+    $('cmTitle').textContent=title; $('cmText').textContent=text;
+    $('cmFoot').innerHTML = `<div class="right"><button class="btn" data-x="no">Hủy</button><button class="btn ${danger?'danger solid':'primary'}" data-x="yes">${esc(okLabel)}</button></div>`;
+    $('cmFoot').onclick = e=>{ const x=e.target.dataset.x; if(!x) return; closeModal('confirmModal'); res(x==='yes'); };
+    openModal('confirmModal');
+  });
+}
+
+/* list interactions */
+$('list').addEventListener('click', async e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  if(b.dataset.edit) return openStudent(b.dataset.edit);
+  if(b.dataset.step){
+    const s=state.students.find(x=>x.id===b.dataset.id);
+    const v=Math.max(0,Math.min(SESSIONS_PER_PACK,(s.sessionsUsed||0)+Number(b.dataset.step)));
+    if(v!==s.sessionsUsed) try{ await store.updateStudent(s.id,{sessionsUsed:v}); }catch(err){ showError(err); }
+  }
+  if(b.dataset.renew){
+    const s=state.students.find(x=>x.id===b.dataset.renew);
+    if(await confirmDialog('Bắt đầu gói mới', `${s.name} đã đóng học phí gói 12 buổi tiếp theo (${money(s.fee)})?`, 'Đã đóng')){
+      try{ await store.updateStudent(s.id,{sessionsUsed:0, packs:(s.packs||0)+1, lastPaid:today()}); toast('Đã bắt đầu gói mới ✔'); }catch(err){ showError(err); }
+    }
+  }
+});
+$('chips').addEventListener('click', e=>{ const c=e.target.closest('[data-chip]'); if(c){ state.filter=c.dataset.chip; render(); } });
+$('search').addEventListener('input', e=>{ state.q=e.target.value; render(); });
+$('showInactive').addEventListener('change', e=>{ state.showInactive=e.target.checked; render(); });
+$('addBtn').addEventListener('click', ()=>openStudent());
+
+/* ============================================================
+   CLASSES
+   ============================================================ */
+let classDraft=[];
+function renderClassRows(){
+  $('classRows').innerHTML = classDraft.filter(c=>!c._del).map((c,i)=>`
+    <div class="cls-row" data-i="${classDraft.indexOf(c)}">
+      <input data-k="name" value="${esc(c.name)}" placeholder="Tên lớp">
+      <input data-k="fee" value="${esc(c.fee)}" inputmode="numeric" placeholder="Học phí">
+      <input data-k="level" value="${esc(c.level||'')}" placeholder="Cấp độ">
+      <input data-k="teacher" value="${esc(c.teacher||'')}" placeholder="Giáo viên">
+      <button class="btn small danger" data-delcls>✕</button>
+    </div>`).join('') || '<p class="meta">Chưa có lớp nào.</p>';
+}
+$('classBtn').addEventListener('click', ()=>{ classDraft = sortedClasses().map(c=>({...c})); renderClassRows(); openModal('classModal'); });
+$('addClassBtn').addEventListener('click', ()=>{ classDraft.push({name:'',fee:500000,level:'',teacher:'',order:classDraft.length+1,_new:true}); renderClassRows(); });
+$('classRows').addEventListener('input', e=>{ const r=e.target.closest('.cls-row'); if(r) classDraft[r.dataset.i][e.target.dataset.k]=e.target.value; });
+$('classRows').addEventListener('click', e=>{
+  if(!e.target.hasAttribute('data-delcls')) return;
+  const c = classDraft[e.target.closest('.cls-row').dataset.i];
+  const n = state.students.filter(s=>s.classId===c.id).length;
+  if(n){ toast(`Lớp còn ${n} học viên – chuyển học viên sang lớp khác trước khi xóa`); return; }
+  c._del=true; renderClassRows();
+});
+$('saveClasses').addEventListener('click', async ()=>{
+  try{
+    for(const [i,c] of classDraft.entries()){
+      const data={name:String(c.name).trim(), fee:Number(String(c.fee).replace(/\D/g,''))||0, level:String(c.level||'').trim(), teacher:String(c.teacher||'').trim(), order:c.order??i+1};
+      if(c._del && c.id) await store.deleteClass(c.id);
+      else if(c._del || !data.name) continue;
+      else if(c._new) await store.addClass(data);
+      else await store.updateClass(c.id,data);
+    }
+    closeModal('classModal'); toast('Đã lưu lớp học ✔');
+  }catch(err){ showError(err); }
+});
+
+/* ============================================================
+   IMPORT EXCEL
+   ============================================================ */
+let parsed=[];  // [{file, className, classId, rows:[{...student, _dup}]}]
+$('importBtn').addEventListener('click', ()=>{ parsed=[]; $('importPreview').innerHTML=''; $('importSummary').textContent=''; $('importGo').disabled=true; $('fileInput').value=''; openModal('importModal'); });
+$('fileInput').addEventListener('change', e=>handleFiles(e.target.files));
+$('drop').addEventListener('dragover', e=>e.preventDefault());
+$('drop').addEventListener('drop', e=>{ e.preventDefault(); handleFiles(e.dataTransfer.files); });
+
+function guessClassName(filename, titleCell){
+  const t = String(titleCell||'').match(/Lớp:\s*([^.…\s][^…]*?)\s{2,}/);
+  if(t && t[1].trim()) return t[1].trim();
+  const f = filename.normalize('NFC').match(/L[ỚO]?[_\s-]*P[_\s-]*(\d+)/i) || filename.match(/(\d+)/);
+  return f ? 'Lớp '+f[1] : filename.replace(/\.\w+$/,'');
+}
+const mode = arr => { const m={}; let best=null; arr.filter(Boolean).forEach(v=>{ m[v]=(m[v]||0)+1; if(!best||m[v]>m[best]) best=v; }); return best; };
+
+async function handleFiles(files){
+  for(const file of files){
+    try{
+      const wb = XLSX.read(await file.arrayBuffer(), {type:'array'});
+      const sheetName = wb.SheetNames.find(n=>/danh s[áa]ch/i.test(n)) || wb.SheetNames[0];
+      const aoa = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], {header:1, raw:true, defval:null});
+      const hi = aoa.findIndex(r=>r.some(c=>/họ\s*(và)?\s*tên/i.test(String(c||''))));
+      if(hi<0){ toast(`${file.name}: không thấy cột “Họ và tên”`); continue; }
+      const H = aoa[hi].map(h=>norm(h));
+      const col = k => H.findIndex(h=>h.includes(k));
+      const C = {name:col('ho va ten'), dob:col('ngay sinh'), gender:col('gioi tinh'), phone:col('dien thoai'), address:col('dia chi'),
+                 level:col('cap do'), start:col('nhap hoc'), fee:col('hoc phi'), note:col('ghi chu'), parent:col('phu huynh')!==col('dien thoai')?col('ten phu huynh'):-1};
+      const get=(r,k)=>C[k]>=0?r[C[k]]:null;
+      const rows=[];
+      for(const r of aoa.slice(hi+1)){
+        if(r.some(c=>/tổng số/i.test(String(c||'')))) break;
+        const name = String(get(r,'name')||'').replace(/\s+/g,' ').trim();
+        if(!name) continue;
+        rows.push({ name, dob:cleanDob(get(r,'dob')), gender:String(get(r,'gender')||'').trim(), phone:cleanPhone(get(r,'phone')),
+          address:String(get(r,'address')||'').trim(), level:String(get(r,'level')||'').trim(), startDate:cleanDob(get(r,'start')),
+          fee:Number(String(get(r,'fee')||'').replace(/\D/g,''))||0, note:String(get(r,'note')||'').trim(), parentName:String(get(r,'parent')||'').trim(),
+          sessionsUsed:0, status:'active' });
+      }
+      const className = guessClassName(file.name, aoa.slice(0,hi).flat().find(c=>/Lớp:/.test(String(c||''))));
+      const existing = state.classes.find(c=>norm(c.name)===norm(className));
+      parsed.push({file:file.name, className, classId: existing?.id || '__new', rows, fee:mode(rows.map(r=>r.fee))||500000, level:mode(rows.map(r=>r.level))||''});
+    }catch(err){ console.error(err); toast(`Không đọc được ${file.name}`); }
+  }
+  renderImport();
+}
+function markDups(p){
+  p.rows.forEach(r=>{ r._dup = p.classId!=='__new' && state.students.some(s=>s.classId===p.classId && norm(s.name)===norm(r.name)); });
+}
+function renderImport(){
+  parsed.sort((a,b)=>a.className.localeCompare(b.className,'vi',{numeric:true}));
+  let total=0, dups=0;
+  $('importPreview').innerHTML = parsed.map((p,pi)=>{
+    markDups(p);
+    const ok=p.rows.filter(r=>!r._dup).length; total+=ok; dups+=p.rows.length-ok;
+    const opts = sortedClasses().map(c=>`<option value="${c.id}" ${c.id===p.classId?'selected':''}>${esc(c.name)}</option>`).join('');
+    return `<div class="file-block">
+      <div class="file-head"><b>📄 ${esc(p.file)}</b>
+        <span>Vào lớp: <select data-pi="${pi}" class="search" style="min-width:0;padding:5px 8px">
+          <option value="__new" ${p.classId==='__new'?'selected':''}>＋ Tạo lớp mới “${esc(p.className)}”</option>${opts}</select></span>
+        <span class="meta">${ok} học viên mới${p.rows.length-ok?` · bỏ qua ${p.rows.length-ok} trùng`:''}</span></div>
+      <div class="file-body"><table><tr><th>#</th><th>Họ tên</th><th>Ngày sinh</th><th>GT</th><th>SĐT</th><th>Cấp độ</th><th>Học phí</th><th>Lưu ý</th></tr>
+      ${p.rows.map((r,i)=>{ const w=warnings(r); return `<tr><td>${i+1}</td><td class="${r._dup?'skip':''}">${esc(r.name)}</td><td>${esc(r.dob)}</td><td>${esc(r.gender)}</td><td>${esc(r.phone)}</td><td>${esc(r.level)}</td><td>${money(r.fee)}</td><td>${r._dup?'Đã có':w.map(x=>'<span class="tag warn">'+esc(x)+'</span>').join(' ')}</td></tr>`;}).join('')}
+      </table></div></div>`;
+  }).join('');
+  $('importSummary').textContent = parsed.length ? `Sẽ nhập ${total} học viên${dups?`, bỏ qua ${dups} đã có`:''}. Học viên có ⚠ vẫn được nhập, chị sửa sau.` : '';
+  $('importGo').disabled = !total;
+  $('importGo').textContent = `Nhập ${total} học viên`;
+}
+$('importPreview').addEventListener('change', e=>{ if(e.target.dataset.pi!==undefined){ parsed[e.target.dataset.pi].classId=e.target.value; renderImport(); } });
+$('importGo').addEventListener('click', async ()=>{
+  $('importGo').disabled=true; $('importGo').textContent='Đang nhập…';
+  try{
+    let n=0;
+    for(const p of parsed){
+      let classId=p.classId;
+      if(classId==='__new'){
+        const exist = state.classes.find(c=>norm(c.name)===norm(p.className));
+        const num = Number((p.className.match(/\d+/)||[99])[0]);
+        classId = exist?.id || await store.addClass({name:p.className, fee:p.fee, level:p.level, teacher:'', order:num});
+        state.classes.push({id:classId,name:p.className}); // tránh tạo trùng khi nhiều file cùng lớp
+      }
+      const list = p.rows.filter(r=>!r._dup).map(({_dup,...r})=>({...r, classId, fee:r.fee||p.fee}));
+      if(list.length){ await store.addStudents(list); n+=list.length; }
+    }
+    closeModal('importModal'); toast(`Đã nhập ${n} học viên ✔`, 3500);
+  }catch(err){ showError(err); $('importGo').disabled=false; $('importGo').textContent='Thử lại'; }
+});
+
+/* ============================================================
+   EXPORT
+   ============================================================ */
+$('exportBtn').addEventListener('click', ()=>{
+  const order = Object.fromEntries(sortedClasses().map((c,i)=>[c.id,i]));
+  const rows = [...state.students].sort((a,b)=>(order[a.classId]??99)-(order[b.classId]??99)||vnSort(a.name,b.name)).map(s=>({
+    'Mã HV':s.code, 'Họ và tên':s.name, 'Lớp':classById(s.classId)?.name||'', 'Ngày sinh':s.dob, 'Giới tính':s.gender, 'Cấp độ':s.level,
+    'Tên phụ huynh':s.parentName, 'SĐT phụ huynh':s.phone, 'Địa chỉ':s.address, 'Học phí/gói':s.fee, 'Đã học (gói hiện tại)':s.sessionsUsed||0,
+    'Ngày nhập học':s.startDate, 'Trạng thái':s.status==='inactive'?'Đã nghỉ':'Đang học', 'Ghi chú':s.note }));
+  const ws = XLSX.utils.json_to_sheet(rows); ws['!cols']=[8,24,8,11,8,8,18,13,20,11,10,12,10,24].map(w=>({wch:w}));
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Học viên');
+  XLSX.writeFile(wb, `DT_hoc_vien_${today().split('/').reverse().join('-')}.xlsx`);
+});
+
+/* ============================================================
+   ERRORS / AUTH / BOOT
+   ============================================================ */
+function showError(err){
+  console.error(err);
+  if(String(err?.code||err).includes('permission-denied')){
+    $('banner').innerHTML = `<div class="banner"><b>Firestore chưa cho phép tài khoản này đọc/ghi dữ liệu học viên.</b><br>Vào Firebase Console → Firestore → Rules và thêm quyền cho <code>students</code>, <code>classes</code>, <code>meta</code> (xem hướng dẫn kèm theo).</div>`;
+    toast('Chưa có quyền truy cập dữ liệu (permission-denied)', 4000);
+  } else toast('Lỗi: '+(err?.message||err), 4000);
+}
+const authMsg = c => ({'auth/invalid-credential':'Sai email hoặc mật khẩu','auth/wrong-password':'Sai mật khẩu','auth/user-not-found':'Không có tài khoản này',
+  'auth/too-many-requests':'Thử sai quá nhiều lần, đợi vài phút','auth/operation-not-allowed':'Chưa bật đăng nhập Email/Password trong Firebase',
+  'auth/unauthorized-domain':'Tên miền này chưa được thêm vào Authorized domains của Firebase'}[c] || c);
+
+$('loginForm').addEventListener('submit', async e=>{
+  e.preventDefault(); $('loginErr').textContent='';
+  try{ await store.login($('loginEmail').value.trim(), $('loginPass').value); }
+  catch(err){ $('loginErr').textContent = authMsg(err.code); }
+});
+$('forgotBtn').addEventListener('click', async ()=>{
+  const e=$('loginEmail').value.trim(); if(!e){ $('loginErr').textContent='Nhập email trước'; return; }
+  try{ await store.reset(e); $('loginErr').style.color='var(--green)'; $('loginErr').textContent='Đã gửi email đặt lại mật khẩu'; }
+  catch(err){ $('loginErr').textContent=authMsg(err.code); }
+});
+$('logoutBtn').addEventListener('click', ()=>store.logout());
+
+(async function boot(){
+  try{ store = DEMO ? makeDemoStore() : await makeFirebaseStore(); }
+  catch(err){ document.body.innerHTML='<p style="padding:20px">Không tải được Firebase. Kiểm tra kết nối mạng rồi tải lại trang.</p>'; return; }
+  if(DEMO) $('banner').innerHTML='<div class="banner demo">👀 Bản xem thử với dữ liệu mẫu – thay đổi không được lưu.</div>';
+  store.onAuth(user=>{
+    if(user){
+      $('login').hidden=true; $('app').hidden=false; $('userEmail').textContent=user.email||'';
+      store.watch(s=>{ state.students=s; render(); }, c=>{ state.classes=c; render(); }, showError);
+    } else {
+      store.stop(); state.students=[]; state.classes=[];
+      $('app').hidden=true; $('login').hidden=false;
+    }
+  });
+})();
+</script>
+</body>
+</html>
